@@ -27,7 +27,7 @@ A lightweight, Notion-style AI text editor built on top of the Novel editor suit
    http://localhost:3000
 
 
-## 注意事項
+## Notes
 
 1. API Key: A valid OpenAI API Key is required for AI features to function.
 2. Images: Currently uses Base64 encoding for uploads (can be extended to cloud storage like S3 or UploadThing).
