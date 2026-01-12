@@ -30,7 +30,11 @@ const defaultEditorContent: JSONContent = {
   content: [],
 };
 
-export default function Editor() {
+interface EditorProps {
+  onSaveStatusChange?: (status: string) => void;
+}
+
+export default function Editor({ onSaveStatusChange }: EditorProps) {
   const [initialContent, setInitialContent] = useState<null | JSONContent>(null);
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [charsCount, setCharsCount] = useState<number>();
@@ -46,7 +50,9 @@ export default function Editor() {
     setCharsCount(wordCount > 0 ? wordCount : undefined);
     window.localStorage.setItem("novel-content", JSON.stringify(json));
     window.localStorage.setItem("markdown", editor.storage.markdown.getMarkdown());
-    setSaveStatus("Saved");
+    const newStatus = "Saved";
+    setSaveStatus(newStatus);
+    onSaveStatusChange?.(newStatus);
   }, 500);
 
   useEffect(() => {
@@ -58,12 +64,11 @@ export default function Editor() {
   if (!initialContent) return null;
 
   return (
-    <div className="relative w-full max-w-screen-lg">
-      <div className="absolute right-5 top-5 z-10 mb-5 flex gap-2">
-        <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{saveStatus}</div>
+    <div className="relative w-full">
+      <div className="mb-4 flex items-center justify-end gap-4 text-sm text-muted-foreground">
         {charsCount !== undefined && charsCount > 0 && (
-          <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">
-            {charsCount} Words
+          <div className="flex items-center gap-2">
+            <span>{charsCount} words</span>
           </div>
         )}
       </div>
@@ -71,7 +76,7 @@ export default function Editor() {
         <EditorContent
           initialContent={initialContent}
           extensions={extensions}
-          className="relative min-h-[500px] w-full max-w-screen-lg border-muted bg-background sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:shadow-lg overflow-hidden"
+          className="relative min-h-[600px] w-full border-muted bg-background rounded-lg border shadow-sm overflow-hidden"
           editorProps={{
             handleDOMEvents: {
               keydown: (_view, event) => handleCommandNavigation(event),
@@ -85,7 +90,9 @@ export default function Editor() {
           }}
           onUpdate={({ editor }) => {
             debouncedUpdates(editor);
-            setSaveStatus("Unsaved");
+            const newStatus = "Unsaved";
+            setSaveStatus(newStatus);
+            onSaveStatusChange?.(newStatus);
           }}
           slotAfter={<ImageResizer />}
         >
