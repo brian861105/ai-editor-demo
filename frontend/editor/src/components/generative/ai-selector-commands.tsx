@@ -1,9 +1,11 @@
 import { ArrowDownWideNarrow, CheckCheck, RefreshCcwDot, StepForward, WrapText } from 'lucide-react'
 import { getPrevText, useEditor } from 'novel'
 
+import type { AIOption } from '@/types/ai'
+
 import { CommandGroup, CommandItem, CommandSeparator } from '../base/Command'
 
-const options = [
+const options: Array<{ value: AIOption; label: string; icon: typeof RefreshCcwDot }> = [
   {
     value: 'improve',
     label: 'Improve writing',
@@ -27,7 +29,7 @@ const options = [
 ]
 
 interface AISelectorCommandsProps {
-  onSelect: (value: string, option: string) => void
+  onSelect: (value: string, option: AIOption) => void
 }
 
 const AISelectorCommands = ({ onSelect }: AISelectorCommandsProps) => {
@@ -39,10 +41,10 @@ const AISelectorCommands = ({ onSelect }: AISelectorCommandsProps) => {
       <CommandGroup heading={'Edit or review selection'}>
         {options.map((option) => (
           <CommandItem
-            onSelect={(value) => {
+            onSelect={() => {
               const slice = editor.state.selection.content()
               const text = editor.storage.markdown.serializer.serialize(slice.content)
-              onSelect(text, value)
+              onSelect(text, option.value)
             }}
             className={'flex gap-2 px-4'}
             key={option.value}

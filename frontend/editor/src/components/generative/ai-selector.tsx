@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useCompletion } from '@ai-sdk/react'
 import { ArrowUp } from 'lucide-react'
 import { addAIHighlight, useEditor } from 'novel'
 import Markdown from 'react-markdown'
 
 import { Command, CommandInput } from '@/components/base/Command'
+import { useAIGeneration } from '@/hooks/useAIGeneration'
 
 import { Button } from '../base/Button'
 import { ScrollArea } from '../base/ScrollArea'
@@ -23,8 +23,7 @@ interface AISelectorProps {
 export function AISelector({ onOpenChange }: AISelectorProps) {
   const { editor } = useEditor()
   const [inputValue, setInputValue] = useState('')
-  const { completion, complete, isLoading } = useCompletion({
-    api: '/api/generate',
+  const { completion, isLoading, generate } = useAIGeneration({
     onFinish: () => {
       // Completion finished successfully
     },
@@ -74,17 +73,15 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
                 'absolute right-2 top-1/2 size-6 -translate-y-1/2 rounded-full bg-purple-500 hover:bg-purple-900'
               }
               onClick={() => {
-                if (completion)
-                  return complete(completion, {
-                    body: { option: 'zap', command: inputValue }
-                  }).then(() => setInputValue(''))
+                if (completion) {
+                  generate(completion, { option: 'zap', command: inputValue }).then(() => setInputValue(''))
+                  return
+                }
 
                 const slice = editor.state.selection.content()
                 const text = editor.storage.markdown.serializer.serialize(slice.content)
 
-                complete(text, {
-                  body: { option: 'zap', command: inputValue }
-                }).then(() => setInputValue(''))
+                generate(text, { option: 'zap', command: inputValue }).then(() => setInputValue(''))
               }}
             >
               <ArrowUp className={'size-4'} />
@@ -99,7 +96,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
               completion={completion}
             />
           ) : (
-            <AISelectorCommands onSelect={(value, option) => complete(value, { body: { option } })} />
+            <AISelectorCommands onSelect={(value, option) => generate(value, { option })} />
           )}
         </>
       )}
