@@ -1,3 +1,4 @@
+pub mod ai;
 pub mod auth;
 pub mod claims;
 pub mod errors;
@@ -35,6 +36,7 @@ pub fn build_app(opts: &HttpOpts, state: state::AppState) -> anyhow::Result<Rout
         .route("/infoz", get(move || async move { service_info }))
         .route("/healthz", get(|| async { StatusCode::OK }))
         .nest("/auth", auth::routes())
+        .merge(ai::routes())
         .merge(graphql::routes())
         .layer(
             CorsLayer::new()

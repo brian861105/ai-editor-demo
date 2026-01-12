@@ -3,7 +3,7 @@ pub use atb_cli_utils::{
     clap::{self, Parser},
 };
 
-use crate::opts::{DatabaseOpts, HttpOpts, TemporalOpts, WorkerOpts};
+use crate::opts::{DatabaseOpts, HttpOpts, Opts, TemporalOpts, WorkerOpts};
 
 #[derive(Parser, Debug)]
 #[clap(
@@ -36,6 +36,9 @@ pub enum Commands {
 
         #[clap(flatten)]
         worker: WorkerOpts,
+
+        #[clap(flatten)]
+        opts: Opts,
     },
     /// Run Temporal worker only (no HTTP server)
     Worker {

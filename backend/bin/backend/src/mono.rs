@@ -9,6 +9,7 @@ pub async fn run(
     db_opts: DatabaseOpts,
     http_opts: HttpOpts,
     worker_opts: WorkerOpts,
+    opts: Opts,
 ) -> anyhow::Result<()> {
     let client_id = crate::Cli::client_id();
     let pg_pool = sqlx_postgres::connect_pg(&db_opts.postgres, 30, Some(&client_id)).await?;
@@ -25,7 +26,14 @@ pub async fn run(
     let worker_handle =
         std::thread::spawn(move || crate::worker::start_worker(client, worker_config));
 
-    http::start_http(pg_pool, http_client, http_opts, task_queue).await?;
+    http::start_http(
+        pg_pool,
+        http_client,
+        http_opts,
+        task_queue,
+        opts.openai_api_key,
+    )
+    .await?;
 
     worker_handle
         .join()

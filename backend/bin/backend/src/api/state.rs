@@ -14,6 +14,7 @@ pub struct AppState {
     pub pg_pool: PgPool,
     pub jwt_encoder: Encoder,
     pub jwt_decoder: Decoder,
+    pub api_key: String,
 }
 
 impl AppState {
@@ -23,6 +24,7 @@ impl AppState {
         pg_pool: PgPool,
         jwt_encoder: Encoder,
         jwt_decoder: Decoder,
+        api_key: String,
     ) -> Self {
         Self {
             schema,
@@ -30,6 +32,7 @@ impl AppState {
             pg_pool,
             jwt_encoder,
             jwt_decoder,
+            api_key,
         }
     }
 }

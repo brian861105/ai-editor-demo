@@ -27,11 +27,7 @@ pub struct HttpOpts {
     pub origins: Vec<String>,
 
     // Client IP extraction source (default: raw socket via ConnectInfo).
-    #[arg(
-        long,
-        default_value = "ConnectInfo",
-        env = "BACKEND_CLIENT_IP_SOURCE"
-    )]
+    #[arg(long, default_value = "ConnectInfo", env = "BACKEND_CLIENT_IP_SOURCE")]
     pub client_ip_source: ClientIpSource,
 
     /// JWT Private Key PEM
@@ -167,4 +163,10 @@ pub struct WorkerOpts {
         env = "BACKEND_TEMPORAL_MAX_CACHED_WORKFLOWS"
     )]
     pub max_cached_workflows: usize,
+}
+
+#[derive(Clone, Debug, Parser)]
+pub struct Opts {
+    #[arg(long, env = "OPENAI_API_KEY")]
+    pub openai_api_key: String,
 }

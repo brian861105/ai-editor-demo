@@ -3,6 +3,7 @@ pub mod cli;
 pub mod graphql;
 
 pub mod http;
+pub mod model;
 pub mod mono;
 pub mod opts;
 pub mod worker;
@@ -40,10 +41,11 @@ fn main() -> Result<()> {
             db_opts,
             http,
             worker,
+            opts,
         } => {
             let _guard = init_tracer(Default::default()).expect("tracer setup succeeds. qed");
             let runtime = Cli::create_runtime(cli.worker_threads)?;
-            runtime.block_on(async move { mono::run(db_opts, http, worker).await })
+            runtime.block_on(async move { mono::run(db_opts, http, worker, opts).await })
         }
     }
 }
