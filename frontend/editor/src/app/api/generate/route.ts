@@ -1,11 +1,12 @@
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { env } from "@/constants/env";
 
 export const runtime = "edge";
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "") {
+    if (!env.OPENAI_API_KEY || env.OPENAI_API_KEY === "") {
       return new Response("Missing OPENAI_API_KEY - make sure to add it to your .env.local file.", {
         status: 400,
       });
