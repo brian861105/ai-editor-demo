@@ -1,4 +1,4 @@
-use crate::editor::types::{TextInput, TextOutput};
+use crate::refiner::types::{RefineInput, RefineOutput};
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 
@@ -29,7 +29,7 @@ struct ChatMessageResponse {
     content: String,
 }
 
-pub async fn call_improve_api(input: TextInput, api_key: &str) -> Result<TextOutput> {
+pub async fn call_improve_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message = "You are an AI writing assistant that improves existing text. Limit your response to no more than 200 characters, but make sure to construct complete sentences. Use Markdown formatting when appropriate.";
@@ -58,7 +58,7 @@ pub async fn call_improve_api(input: TextInput, api_key: &str) -> Result<TextOut
         .await
         .context("Failed to parse OpenAI API response")?;
 
-    Ok(TextOutput {
+    Ok(RefineOutput {
         content: result
             .choices
             .first()
@@ -67,7 +67,7 @@ pub async fn call_improve_api(input: TextInput, api_key: &str) -> Result<TextOut
     })
 }
 
-pub async fn call_fix_api(input: TextInput, api_key: &str) -> Result<TextOutput> {
+pub async fn call_fix_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message = "You are an AI writing assistant that fixes grammar and spelling errors in existing text. Limit your response to no more than 200 characters, but make sure to construct complete sentences. Use Markdown formatting when appropriate.".to_string();
@@ -96,7 +96,7 @@ pub async fn call_fix_api(input: TextInput, api_key: &str) -> Result<TextOutput>
         .await
         .context("Failed to parse OpenAI API response")?;
 
-    Ok(TextOutput {
+    Ok(RefineOutput {
         content: result
             .choices
             .first()
@@ -105,7 +105,7 @@ pub async fn call_fix_api(input: TextInput, api_key: &str) -> Result<TextOutput>
     })
 }
 
-pub async fn call_longer_api(input: TextInput, api_key: &str) -> Result<TextOutput> {
+pub async fn call_longer_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message ="You are an AI writing assistant that lengthens existing text. Use Markdown formatting when appropriate.".to_string();
@@ -134,7 +134,7 @@ pub async fn call_longer_api(input: TextInput, api_key: &str) -> Result<TextOutp
         .await
         .context("Failed to parse OpenAI API response")?;
 
-    Ok(TextOutput {
+    Ok(RefineOutput {
         content: result
             .choices
             .first()
@@ -143,7 +143,7 @@ pub async fn call_longer_api(input: TextInput, api_key: &str) -> Result<TextOutp
     })
 }
 
-pub async fn call_shorter_api(input: TextInput, api_key: &str) -> Result<TextOutput> {
+pub async fn call_shorter_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message = "You are an AI writing assistant that shortens existing text. Use Markdown formatting when appropriate.".to_string();
@@ -172,7 +172,7 @@ pub async fn call_shorter_api(input: TextInput, api_key: &str) -> Result<TextOut
         .await
         .context("Failed to parse OpenAI API response")?;
 
-    Ok(TextOutput {
+    Ok(RefineOutput {
         content: result
             .choices
             .first()

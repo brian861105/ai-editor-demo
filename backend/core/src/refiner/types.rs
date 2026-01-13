@@ -1,9 +1,9 @@
 #[derive(Debug)]
-pub struct TextInput {
+pub struct RefineInput {
     pub content: String,
 }
 
 #[derive(Debug)]
-pub struct TextOutput {
+pub struct RefineOutput {
     pub content: String,
 }
