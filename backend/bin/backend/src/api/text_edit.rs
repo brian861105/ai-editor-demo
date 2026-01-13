@@ -9,9 +9,12 @@ use axum::{
 use backend_core::refiner::processor::{
     call_fix_api, call_improve_api, call_longer_api, call_shorter_api,
 };
-use backend_core::refiner::types::RefineInput;
-use std::collections::HashMap;
+use backend_core::refiner::types::{RefineInput, RefineOutput};
+use std::pin::Pin;
 use tracing::instrument;
+
+type RefineFuture<'a> =
+    Pin<Box<dyn std::future::Future<Output = anyhow::Result<RefineOutput>> + Send + 'a>>;
 
 pub fn routes() -> Router<AppState> {
     Router::new()
@@ -26,17 +29,16 @@ pub fn routes() -> Router<AppState> {
 }
 
 // refine by single task
-async fn handle_refine_request<F, Fut>(
+async fn handle_refine_request<F>(
     state: &AppState,
     req: RefineRequest,
     refine_fn: F,
 ) -> Result<Json<RefineResponse>, Error>
 where
-    F: FnOnce(RefineInput, String) -> Fut,
-    Fut: std::future::Future<Output = anyhow::Result<backend_core::refiner::types::RefineOutput>>,
+    F: for<'a> FnOnce(RefineInput, &'a str) -> RefineFuture<'a>,
 {
     let input = RefineInput { content: req.text };
-    refine_fn(input, state.api_key.clone())
+    refine_fn(input, &state.api_key)
         .await
         .map(|result| {
             Json(RefineResponse {
@@ -55,7 +57,10 @@ pub async fn improve_text_handler(
     State(state): State<AppState>,
     Json(req): Json<RefineRequest>,
 ) -> Result<Json<RefineResponse>, Error> {
-    handle_refine_request(&state, req, call_improve_api).await
+    handle_refine_request(&state, req, |input, key| {
+        Box::pin(call_improve_api(input, key))
+    })
+    .await
 }
 
 /// Fix grammar and spelling errors in text.
@@ -64,7 +69,7 @@ pub async fn fix_text_handler(
     State(state): State<AppState>,
     Json(req): Json<RefineRequest>,
 ) -> Result<Json<RefineResponse>, Error> {
-    handle_refine_request(&state, req, call_fix_api).await
+    handle_refine_request(&state, req, |input, key| Box::pin(call_fix_api(input, key))).await
 }
 
 /// Lengthen text while maintaining meaning.
@@ -73,7 +78,10 @@ pub async fn longer_text_handler(
     State(state): State<AppState>,
     Json(req): Json<RefineRequest>,
 ) -> Result<Json<RefineResponse>, Error> {
-    handle_refine_request(&state, req, call_longer_api).await
+    handle_refine_request(&state, req, |input, key| {
+        Box::pin(call_longer_api(input, key))
+    })
+    .await
 }
 
 /// Shorten text while maintaining meaning.
@@ -82,7 +90,10 @@ pub async fn shorter_text_handler(
     State(state): State<AppState>,
     Json(req): Json<RefineRequest>,
 ) -> Result<Json<RefineResponse>, Error> {
-    handle_refine_request(&state, req, call_shorter_api).await
+    handle_refine_request(&state, req, |input, key| {
+        Box::pin(call_shorter_api(input, key))
+    })
+    .await
 }
 
 // agent API
@@ -94,36 +105,14 @@ pub async fn agent_pulse_handler(
     use backend_core::intelligence::Brain;
     use backend_core::model::PulseInput;
 
-    // Convert bin/backend model to core model
     let core_req = PulseInput {
         text: req.text,
-        agents: req
-            .agents
-            .iter()
-            .map(|a| match a {
-                Agent::Researcher => backend_core::model::Agent::Researcher,
-                Agent::Refiner => backend_core::model::Agent::Refiner,
-            })
-            .collect(),
+        agents: req.agents.clone(),
     };
 
-    // Convert api_key to &'static str for Brain
-    let api_key: &'static str = Box::leak(state.api_key.clone().into_boxed_str());
+    let core_resp = Brain::evaluate_pulse(core_req, &state.api_key).await;
 
-    let core_resp = Brain::evaluate_pulse(core_req, api_key).await;
-
-    // Convert core model back to bin/backend model
-    let suggestions: HashMap<Agent, String> = core_resp
-        .suggestions
-        .into_iter()
-        .map(|(agent, text)| {
-            let backend_agent = match agent {
-                backend_core::model::Agent::Researcher => Agent::Researcher,
-                backend_core::model::Agent::Refiner => Agent::Refiner,
-            };
-            (backend_agent, text)
-        })
-        .collect();
+    let suggestions = core_resp.suggestions;
 
     Ok(Json(PulseResponse { suggestions }))
 }

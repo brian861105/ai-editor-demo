@@ -29,7 +29,7 @@ struct ChatMessageResponse {
     content: String,
 }
 
-pub async fn call_improve_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
+pub async fn call_improve_api(input: RefineInput, api_key: &str) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message = "You are an AI writing assistant that improves existing text. Limit your response to no more than 200 characters, but make sure to construct complete sentences. Use Markdown formatting when appropriate.";
@@ -67,7 +67,7 @@ pub async fn call_improve_api(input: RefineInput, api_key: String) -> Result<Ref
     })
 }
 
-pub async fn call_fix_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
+pub async fn call_fix_api(input: RefineInput, api_key: &str) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message = "You are an AI writing assistant that fixes grammar and spelling errors in existing text. Limit your response to no more than 200 characters, but make sure to construct complete sentences. Use Markdown formatting when appropriate.".to_string();
@@ -105,7 +105,7 @@ pub async fn call_fix_api(input: RefineInput, api_key: String) -> Result<RefineO
     })
 }
 
-pub async fn call_longer_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
+pub async fn call_longer_api(input: RefineInput, api_key: &str) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message ="You are an AI writing assistant that lengthens existing text. Use Markdown formatting when appropriate.".to_string();
@@ -143,7 +143,7 @@ pub async fn call_longer_api(input: RefineInput, api_key: String) -> Result<Refi
     })
 }
 
-pub async fn call_shorter_api(input: RefineInput, api_key: String) -> Result<RefineOutput> {
+pub async fn call_shorter_api(input: RefineInput, api_key: &str) -> Result<RefineOutput> {
     let client = reqwest::Client::new();
 
     let system_message = "You are an AI writing assistant that shortens existing text. Use Markdown formatting when appropriate.".to_string();

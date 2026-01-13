@@ -8,7 +8,7 @@ use std::collections::HashMap;
 pub struct Brain;
 
 impl Brain {
-    pub async fn evaluate_pulse(req: PulseInput, api_key: &'static str) -> PulseOutput {
+    pub async fn evaluate_pulse(req: PulseInput, api_key: &str) -> PulseOutput {
         use tracing::{error, info, warn};
 
         let available_tools: Vec<ToolDefinition> =
@@ -71,7 +71,7 @@ impl Brain {
     pub async fn decide_tools_to_use(
         text: &str,
         available_tools: &[ToolDefinition],
-        api_key: &'static str,
+        api_key: &str,
     ) -> Result<Vec<ToolAction>> {
         // Convert available_tools to OpenAI function calling format
         let tools: Vec<serde_json::Value> = available_tools
@@ -198,7 +198,7 @@ impl Brain {
     pub async fn execute_tool(
         tool: ToolAction,
         text: &str,
-        api_key: &'static str,
+        api_key: &str,
     ) -> Result<(Agent, String)> {
         match tool {
             ToolAction::Research => {
@@ -212,19 +212,19 @@ impl Brain {
         }
     }
 
-    async fn execute_research_tool(text: &str, _api_key: &'static str) -> Result<String> {
+    async fn execute_research_tool(text: &str, _api_key: &str) -> Result<String> {
         // TODO: Implement research tool
         Ok(format!("Research result for: {}", text))
     }
 
-    async fn execute_refine_tool(text: &str, api_key: &'static str) -> Result<String> {
+    async fn execute_refine_tool(text: &str, api_key: &str) -> Result<String> {
         use crate::refiner::processor;
         use crate::refiner::types::RefineInput;
 
         let input = RefineInput {
             content: text.to_string(),
         };
-        let output = processor::call_improve_api(input, api_key.to_string()).await?;
+        let output = processor::call_improve_api(input, api_key).await?;
         Ok(output.content)
     }
 }

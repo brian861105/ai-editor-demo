@@ -564,6 +564,7 @@ dependencies = [
  "atb-temporal-ext",
  "atb-tokio-ext",
  "atb-types",
+ "enum-iterator",
  "futures",
  "once_cell",
  "reqwest",

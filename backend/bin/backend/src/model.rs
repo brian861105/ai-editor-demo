@@ -10,12 +10,8 @@ pub enum RefineAction {
     Improve,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, enum_iterator::Sequence)]
-#[serde(rename_all = "lowercase")]
-pub enum Agent {
-    Researcher,
-    Refiner,
-}
+// Re-export Agent from core to avoid duplication
+pub use backend_core::model::Agent;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RefineRequest {
