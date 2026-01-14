@@ -1,3 +1,4 @@
+import { refineText } from '@/services/ai'
 import { openai } from '@ai-sdk/openai'
 import { streamText } from 'ai'
 
@@ -7,13 +8,41 @@ export const runtime = 'edge'
 
 export async function POST(req: Request): Promise<Response> {
   try {
+    const { prompt, option, command } = await req.json()
+
+    if (option === 'improve' || option === 'fix' || option === 'longer' || option === 'shorter') {
+      try {
+        const refinedText = await refineText(prompt, option)
+        const encoder = new TextEncoder()
+        const stream = new ReadableStream({
+          start(controller) {
+            let index = 0
+            const interval = setInterval(() => {
+              if (index < refinedText.length) {
+                controller.enqueue(encoder.encode(refinedText[index]))
+                index++
+              } else {
+                clearInterval(interval)
+                controller.close()
+              }
+            }, 10)
+          }
+        })
+        return new Response(stream, {
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8'
+          }
+        })
+      } catch (error) {
+        console.error('Backend refine API error:', error)
+      }
+    }
+
     if (!env.OPENAI_API_KEY || env.OPENAI_API_KEY === '') {
       return new Response('Missing OPENAI_API_KEY - make sure to add it to your .env.local file.', {
         status: 400
       })
     }
-
-    const { prompt, option, command } = await req.json()
 
     let messages: Array<{ role: 'system' | 'user'; content: string }> = []
 

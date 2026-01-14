@@ -1,5 +1,27 @@
 import type { GenerateRequest } from '@/types/ai'
 
+import { env } from '@/constants/env'
+
+export async function refineText(text: string, action: 'improve' | 'fix' | 'longer' | 'shorter'): Promise<string> {
+  const endpoint = `${env.BACKEND_API_URL}/${action}`
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ text })
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => response.statusText)
+    throw new Error(`Backend refine API failed: ${errorText}`)
+  }
+
+  const data = await response.json()
+  return data.text
+}
+
 /**
  *
  *
