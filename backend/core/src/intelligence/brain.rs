@@ -56,7 +56,7 @@ impl Brain {
         arguments: Value,
         api_key: &str,
     ) -> Result<(Agent, String)> {
-        use crate::intelligence::agent::{refiner, researcher};
+        use crate::intelligence::tools::{extender, refiner, researcher};
 
         match name.as_str() {
             "research_agent" => {
@@ -68,6 +68,14 @@ impl Brain {
                 let text = arguments["text"].as_str().unwrap_or("");
                 let output = refiner::execute_tool(text, api_key).await?;
                 Ok((Agent::Refiner, output))
+            }
+            "extender" => {
+                let article_draft = arguments["article_draft"]
+                    .as_str()
+                    .context("Missing article_draft")?;
+                let identity = arguments["identity"].as_str().context("Missing identity")?;
+                let output = extender::execute_tool(article_draft, identity, api_key).await?;
+                Ok((Agent::Extender, output))
             }
             _ => Err(anyhow::anyhow!("Unknown sub-agent: {}", name)),
         }

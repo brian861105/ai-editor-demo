@@ -6,6 +6,7 @@ use std::collections::HashMap;
 pub enum Agent {
     Researcher,
     Refiner,
+    Extender,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

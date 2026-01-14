@@ -1,5 +1,5 @@
-pub mod agent;
 pub mod brain;
+pub mod tools;
 pub mod types;
 
 pub use brain::Brain;
