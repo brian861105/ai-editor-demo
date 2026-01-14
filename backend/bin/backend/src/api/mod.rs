@@ -1,6 +1,7 @@
 pub mod ai;
 pub mod auth;
 pub mod claims;
+pub mod editor;
 pub mod errors;
 pub mod graphql;
 pub mod state;
@@ -38,6 +39,7 @@ pub fn build_app(opts: &HttpOpts, state: state::AppState) -> anyhow::Result<Rout
         .nest("/auth", auth::routes())
         .merge(ai::routes())
         .merge(graphql::routes())
+        .merge(editor::routes())
         .layer(
             CorsLayer::new()
                 .allow_origin(allowed_origins)
